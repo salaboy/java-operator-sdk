@@ -25,6 +25,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.processing.event.rate.PeriodRateLimiter;
 import io.javaoperatorsdk.operator.sample.simple.TestCustomResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -136,7 +137,7 @@ class CustomResourceSelectorTest {
     public MyConfiguration() {
       super(MyController.class.getCanonicalName(), "mycontroller", null, Constants.NO_VALUE_SET,
           false, null,
-          null, null, null, TestCustomResource.class, null, null);
+          null, null, null, TestCustomResource.class, null, new PeriodRateLimiter(), null);
     }
   }
 

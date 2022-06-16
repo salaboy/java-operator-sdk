@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.javaoperatorsdk.operator.api.config.dependent.DependentResourceSpec;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependentResourceConfig;
+import io.javaoperatorsdk.operator.processing.event.rate.RateLimiter;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilter;
 import io.javaoperatorsdk.operator.processing.retry.GenericRetry;
 import io.javaoperatorsdk.operator.processing.retry.Retry;
@@ -27,6 +28,7 @@ public class ControllerConfigurationOverrider<R extends HasMetadata> {
   private final ControllerConfiguration<R> original;
   private Duration reconciliationMaxInterval;
   private final LinkedHashMap<String, DependentResourceSpec> namedDependentResourceSpecs;
+  private RateLimiter rateLimiter;
 
   private ControllerConfigurationOverrider(ControllerConfiguration<R> original) {
     finalizer = original.getFinalizerName();
@@ -41,6 +43,7 @@ public class ControllerConfigurationOverrider<R extends HasMetadata> {
     namedDependentResourceSpecs = new LinkedHashMap<>(dependentResources.size());
     dependentResources.forEach(drs -> namedDependentResourceSpecs.put(drs.getName(), drs));
     this.original = original;
+    this.rateLimiter = original.getRateLimiter();
   }
 
   public ControllerConfigurationOverrider<R> withFinalizer(String finalizer) {
@@ -100,6 +103,11 @@ public class ControllerConfigurationOverrider<R extends HasMetadata> {
   @Deprecated
   public ControllerConfigurationOverrider<R> withRetry(RetryConfiguration retry) {
     this.retry = GenericRetry.fromConfiguration(retry);
+    return this;
+  }
+
+  public ControllerConfigurationOverrider<R> withRateLimiter(RateLimiter rateLimiter) {
+    this.rateLimiter = rateLimiter;
     return this;
   }
 
@@ -167,6 +175,7 @@ public class ControllerConfigurationOverrider<R extends HasMetadata> {
         customResourcePredicate,
         original.getResourceClass(),
         reconciliationMaxInterval,
+        rateLimiter,
         newDependentSpecs);
   }
 

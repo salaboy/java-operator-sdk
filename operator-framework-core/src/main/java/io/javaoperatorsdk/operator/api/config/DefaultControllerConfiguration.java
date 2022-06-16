@@ -8,6 +8,7 @@ import java.util.Set;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.javaoperatorsdk.operator.api.config.dependent.DependentResourceSpec;
+import io.javaoperatorsdk.operator.processing.event.rate.RateLimiter;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilter;
 import io.javaoperatorsdk.operator.processing.retry.Retry;
 
@@ -25,6 +26,7 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
   private final ResourceEventFilter<R> resourceEventFilter;
   private final List<DependentResourceSpec> dependents;
   private final Duration reconciliationMaxInterval;
+  private final RateLimiter rateLimiter;
 
   // NOSONAR constructor is meant to provide all information
   public DefaultControllerConfiguration(
@@ -39,6 +41,7 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
       ResourceEventFilter<R> resourceEventFilter,
       Class<R> resourceClass,
       Duration reconciliationMaxInterval,
+      RateLimiter rateLimiter,
       List<DependentResourceSpec> dependents) {
     super(labelSelector, resourceClass, namespaces);
     this.associatedControllerClassName = associatedControllerClassName;
@@ -52,7 +55,7 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
             ? ControllerConfiguration.super.getRetry()
             : retry;
     this.resourceEventFilter = resourceEventFilter;
-
+    this.rateLimiter = rateLimiter;
     this.dependents = dependents != null ? dependents : Collections.emptyList();
   }
 
@@ -99,5 +102,10 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
   @Override
   public Optional<Duration> reconciliationMaxInterval() {
     return Optional.ofNullable(reconciliationMaxInterval);
+  }
+
+  @Override
+  public RateLimiter getRateLimiter() {
+    return rateLimiter;
   }
 }
