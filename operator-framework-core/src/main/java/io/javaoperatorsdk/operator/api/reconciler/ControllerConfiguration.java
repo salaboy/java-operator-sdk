@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
-import io.javaoperatorsdk.operator.processing.event.rate.PeriodRateLimiter;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilter;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -71,8 +70,7 @@ public @interface ControllerConfiguration {
       interval = 10);
 
 
-  RateLimiter rateLimiter() default @RateLimiter(limitForPeriod = PeriodRateLimiter.NO_LIMIT_PERIOD,
-      refreshPeriod = 1);
+  RateLimiter rateLimiter() default @RateLimiter;
 
   /**
    * Optional list of {@link Dependent} configurations which associate a resource type to a
