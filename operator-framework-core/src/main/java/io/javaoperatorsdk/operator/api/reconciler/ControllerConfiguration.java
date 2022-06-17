@@ -70,7 +70,7 @@ public @interface ControllerConfiguration {
       interval = 10);
 
 
-  RateLimiter rateLimiter() default @RateLimiter;
+  RateLimit rateLimit() default @RateLimit;
 
   /**
    * Optional list of {@link Dependent} configurations which associate a resource type to a
