@@ -8,6 +8,7 @@ import java.util.Set;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.javaoperatorsdk.operator.api.config.dependent.DependentResourceSpec;
+import io.javaoperatorsdk.operator.api.config.eventsource.EventSourceSpec;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilter;
 import io.javaoperatorsdk.operator.processing.retry.Retry;
 
@@ -23,6 +24,7 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
   private final boolean generationAware;
   private final Retry retry;
   private final ResourceEventFilter<R> resourceEventFilter;
+  private final List<EventSourceSpec> eventSourceSpecs;
   private final List<DependentResourceSpec> dependents;
   private final Duration reconciliationMaxInterval;
 
@@ -39,6 +41,7 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
       ResourceEventFilter<R> resourceEventFilter,
       Class<R> resourceClass,
       Duration reconciliationMaxInterval,
+      List<EventSourceSpec> eventSourceSpecs,
       List<DependentResourceSpec> dependents) {
     super(labelSelector, resourceClass, namespaces);
     this.associatedControllerClassName = associatedControllerClassName;
@@ -46,6 +49,7 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
     this.crdName = crdName;
     this.finalizer = finalizer;
     this.generationAware = generationAware;
+    this.eventSourceSpecs = eventSourceSpecs;
     this.reconciliationMaxInterval = reconciliationMaxInterval;
     this.retry =
         retry == null

@@ -8,6 +8,7 @@ import java.util.Optional;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.javaoperatorsdk.operator.ReconcilerUtils;
 import io.javaoperatorsdk.operator.api.config.dependent.DependentResourceSpec;
+import io.javaoperatorsdk.operator.api.config.eventsource.EventSourceSpec;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilter;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilters;
 import io.javaoperatorsdk.operator.processing.retry.GenericRetry;
@@ -56,6 +57,10 @@ public interface ControllerConfiguration<R extends HasMetadata> extends Resource
    */
   default ResourceEventFilter<R> getEventFilter() {
     return ResourceEventFilters.passthrough();
+  }
+
+  default List<EventSourceSpec> getEventSources() {
+    return Collections.emptyList();
   }
 
   @SuppressWarnings("rawtypes")
