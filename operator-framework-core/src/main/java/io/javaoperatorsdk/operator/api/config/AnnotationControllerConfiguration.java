@@ -12,6 +12,7 @@ import io.javaoperatorsdk.operator.OperatorException;
 import io.javaoperatorsdk.operator.ReconcilerUtils;
 import io.javaoperatorsdk.operator.api.config.dependent.DependentResourceSpec;
 import io.javaoperatorsdk.operator.api.config.eventsource.EventSourceSpec;
+import io.javaoperatorsdk.operator.api.config.eventsource.GenericEventSourceSpec;
 import io.javaoperatorsdk.operator.api.config.eventsource.InformerEventSourceSpec;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
@@ -22,6 +23,7 @@ import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDep
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependentResourceConfig;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
+import io.javaoperatorsdk.operator.processing.event.source.PrimaryToSecondaryMapper;
 import io.javaoperatorsdk.operator.processing.event.source.SecondaryToPrimaryMapper;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilter;
 import io.javaoperatorsdk.operator.processing.event.source.controller.ResourceEventFilters;
@@ -164,7 +166,7 @@ public class AnnotationControllerConfiguration<R extends HasMetadata>
 
   @SuppressWarnings("unchecked")
   private EventSourceSpec toEventSourceSpec(EventSource eventSource) {
-    return new EventSourceSpec(eventSource.name(), eventSource.type());
+    return new GenericEventSourceSpec(eventSource.name(), eventSource.type());
   }
 
   @SuppressWarnings("unchecked")
@@ -172,11 +174,17 @@ public class AnnotationControllerConfiguration<R extends HasMetadata>
     try {
       Set<String> namespaces = new HashSet<>();
       Collections.addAll(namespaces, informer.namespaces());
-      SecondaryToPrimaryMapper<R> mapper =
+      SecondaryToPrimaryMapper<R> secondaryToPrimaryMapper =
           informer.secondaryToPrimaryMapper().getConstructor().newInstance();
+      PrimaryToSecondaryMapper primaryToSecondaryMapper = null;
+      // todo unit test
+      if (!informer.primaryToSecondaryMapper().equals(VoidPrimaryToSecondaryMapper.class)) {
+        primaryToSecondaryMapper =
+            informer.primaryToSecondaryMapper().getConstructor().newInstance();
+      }
       return new InformerEventSourceSpec(informer.name(), informer.resourceType(),
           informer.labelSelector(), namespaces,
-          informer.followNamespaceChanges(), mapper);
+          informer.followNamespaceChanges(), secondaryToPrimaryMapper, primaryToSecondaryMapper);
     } catch (InstantiationException | IllegalAccessException | InvocationTargetException
         | NoSuchMethodException e) {
       throw new IllegalStateException(e);
