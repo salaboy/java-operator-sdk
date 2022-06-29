@@ -104,4 +104,12 @@ public class DefaultControllerConfiguration<R extends HasMetadata>
   public Optional<Duration> reconciliationMaxInterval() {
     return Optional.ofNullable(reconciliationMaxInterval);
   }
+
+  @Override
+  public List<EventSourceSpec> getEventSources() {
+    if (eventSourceSpecs == null) {
+      return Collections.emptyList();
+    }
+    return eventSourceSpecs;
+  }
 }
